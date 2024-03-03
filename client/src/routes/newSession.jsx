@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from "react";
 
 function NewSession() {
-  const [players, setPlayers] = useState([]);
+  const [tracks, setTracks] = useState([]);
   useEffect(() => {
     const callBackendAPI = async () => {
       try {
-        // change to /api/players for dev
         // maybe add this line to client package.json: "proxy": "http://localhost:3500"
-        const response = await fetch("/players");
+        const response = await fetch("/tracks");
         if (!response.ok) {
           throw new Error("Failed to fetch data");
         }
         const body = await response.json();
-        setPlayers(body);
+        setTracks(body);
       } catch (error) {
         console.error(error.message);
       }
@@ -22,8 +21,8 @@ function NewSession() {
 
   return (
     <div>
-      {players.map((player, i) => (
-        <h2 key={i}>{player}</h2>
+      {tracks.map((track, i) => (
+        <h2 key={i}>{track}</h2>
       ))}
     </div>
   );
