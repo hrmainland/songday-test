@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import baseURL from "../../utils/urlPrefix";
 
 function NewSession() {
   const [tracks, setTracks] = useState([]);
@@ -6,6 +7,7 @@ function NewSession() {
     const callBackendAPI = async () => {
       try {
         // maybe add this line to client package.json: "proxy": "http://localhost:3500"
+        console.log("baseUrl :>> ", baseURL);
         const response = await fetch("/tracks");
         if (!response.ok) {
           throw new Error("Failed to fetch data");
