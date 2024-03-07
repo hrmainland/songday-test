@@ -1,3 +1,4 @@
-const baseUrl = import.meta.env.NODE_ENV !== 'production' ? '/api' : '';
+const devMode = true;
+const baseUrl = devMode ? '/api' : '';
 
 export default baseUrl;

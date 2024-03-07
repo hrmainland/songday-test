@@ -7,8 +7,7 @@ function NewSession() {
     const callBackendAPI = async () => {
       try {
         // maybe add this line to client package.json: "proxy": "http://localhost:3500"
-        console.log("baseUrl :>> ", baseURL);
-        const response = await fetch("/tracks");
+        const response = await fetch(`${baseURL}/tracks`);
         if (!response.ok) {
           throw new Error("Failed to fetch data");
         }
