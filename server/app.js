@@ -4,6 +4,7 @@ if (process.env.NODE_ENV !== "production") {
 
 const cors = require("cors");
 const axios = require("axios");
+const request = require("request");
 const express = require("express");
 const app = express();
 const path = require("path");
@@ -20,6 +21,10 @@ const client_id = "3db1ac7a10994db384064b7ae0b88369";
 const client_secret = "c9b89cb0640943309975e8774efecacb";
 const redirect_uri = `http://localhost:3500/callback`;
 
+// this obviously won't work in real code:
+const access_token =
+  "BQBynfQkH5rmTFaGdSNW1J6EKVFgCbr1Ty0sSsu6of4W6ykf5gJnTq5lT2VvIn8_TyTy6ZwpeL5PS8zvqD6sCXEQEYPugJYZkT7gNn4mE_WsWIZVRW33um-95_6OmBiSnrgHY4gK-g49mNdL6mgo6tQshTxfkr6yKZyBIoxjpPSE86ybXglt4keVIFH5zxspYVOZszMbKUU8";
+
 function generateRandomString(length) {
   var result = "";
   var characters =
@@ -33,7 +38,7 @@ function generateRandomString(length) {
 
 app.get("/login", function (req, res) {
   var state = generateRandomString(16);
-  var scope = "user-read-private user-read-email";
+  var scope = "playlist-read-private user-read-private user-read-email";
 
   res.redirect(
     "https://accounts.spotify.com/authorize?" +
@@ -59,7 +64,6 @@ app.get("/callback", async function (req, res) {
         })
     );
   } else {
-    console.log("I am here");
     var authOptions = {
       url: "https://accounts.spotify.com/api/token",
       form: {
@@ -76,22 +80,41 @@ app.get("/callback", async function (req, res) {
       json: true,
     };
 
-    // Make a POST request to the Spotify token endpoint using axios
-    axios
-      .post(authOptions.url, querystring.stringify(authOptions.form), {
-        headers: authOptions.headers,
-      })
-      .then((response) => {
-        // Handle successful response
-        const accessToken = response.data.access_token;
-        console.log("Access Token:", accessToken);
-        // You can use this access token for subsequent calls to Spotify Web API services
-      })
-      .catch((error) => {
-        // Handle error
-        console.error("Error:", error.response.data);
-      });
+    // Make a request to the Spotify API token endpoint
+    request.post(authOptions, function (error, response, body) {
+      if (!error && response.statusCode === 200) {
+        // Access the access_token from the response body
+        var access_token = body.access_token;
+        // You can now use this access_token in subsequent calls to Spotify API services
+        console.log("Access Token:", access_token);
+      } else {
+        console.log("Error:", error);
+      }
+    });
+
+    res.redirect("/");
   }
+});
+
+app.get("/playlists", async (req, res) => {
+  const options = {
+    url: "https://api.spotify.com/v1/users/hrmainland/playlists",
+    headers: {
+      Authorization: `Bearer ${access_token}`,
+    },
+  };
+
+  request.get(options, (error, response, body) => {
+    if (error) {
+      console.error("Error:", error);
+      return;
+    }
+    // console.log("Response:", body);
+    const jsonBody = JSON.parse(body);
+    const names = jsonBody.items.map((playlist) => playlist.name);
+    console.log(names);
+    res.send(names);
+  });
 });
 
 async function quickSeedTracks() {
